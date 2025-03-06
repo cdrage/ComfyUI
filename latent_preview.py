@@ -25,6 +25,8 @@ class LatentPreviewer:
 
     def decode_latent_to_preview_image(self, preview_format, x0):
         preview_image = self.decode_latent_to_preview(x0)
+        preview_image.save("/tmp/comfy_preview_latent.jpg", format="JPEG")
+
         return ("JPEG", preview_image, MAX_PREVIEW_RESOLUTION)
 
 class TAESDPreviewerImpl(LatentPreviewer):
