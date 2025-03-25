@@ -51,21 +51,7 @@ def load_torch_file(ckpt, safe_load=False, device=None, return_metadata=False):
         device = torch.device("cpu")
     metadata = None
     if ckpt.lower().endswith(".safetensors") or ckpt.lower().endswith(".sft"):
-        try:
-            with safetensors.safe_open(ckpt, framework="pt", device=device.type) as f:
-                sd = {}
-                for k in f.keys():
-                    sd[k] = f.get_tensor(k)
-                if return_metadata:
-                    metadata = f.metadata()
-        except Exception as e:
-            if len(e.args) > 0:
-                message = e.args[0]
-                if "HeaderTooLarge" in message:
-                    raise ValueError("{}\n\nFile path: {}\n\nThe safetensors file is corrupt or invalid. Make sure this is actually a safetensors file and not a ckpt or pt or other filetype.".format(message, ckpt))
-                if "MetadataIncompleteBuffer" in message:
-                    raise ValueError("{}\n\nFile path: {}\n\nThe safetensors file is corrupt/incomplete. Check the file size and make sure you have copied/downloaded it correctly.".format(message, ckpt))
-            raise e
+        sd = safetensors.torch.load(open(ckpt, 'rb').read())
     else:
         if safe_load or ALWAYS_SAFE_LOAD:
             pl_sd = torch.load(ckpt, map_location=device, weights_only=True)
